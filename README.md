@@ -83,13 +83,13 @@ git clone https://github.com/santarl/kickstart-modular.nvim.git "${XDG_CONFIG_HO
 If you're using `cmd.exe`:
 
 ```
-git clone https://github.com/santarl/kickstart.nvim.git "%localappdata%\nvim"
+git clone https://github.com/santarl/kickstart-modular.nvim.git "%localappdata%\nvim"
 ```
 
 If you're using `powershell.exe`
 
 ```
-git clone https://github.com/santarl/kickstart.nvim.git "${env:LOCALAPPDATA}\nvim"
+git clone https://github.com/santarl/kickstart-modular.nvim.git "${env:LOCALAPPDATA}\nvim"
 ```
 
 </details>
