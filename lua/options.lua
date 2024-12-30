@@ -3,11 +3,66 @@
 -- NOTE: You can change these options as you wish!
 --  For more options, you can see `:help option-list`
 
--- Make line numbers default
-vim.opt.number = true
--- You can also add relative line numbers, to help with jumping.
---  Experiment for yourself to see if you like it!
--- vim.opt.relativenumber = true
+-- neovide settings
+
+if vim.g.neovide then
+  vim.keymap.set('n', '<C-s>', ':w<CR>') -- Save
+  vim.keymap.set('v', '<C-c>', '"+y') -- Copy
+  vim.keymap.set('n', '<C-v>', '"+P') -- Paste normal mode
+  vim.keymap.set('v', '<C-v>', '"+P') -- Paste visual mode
+  vim.keymap.set('c', '<C-v>', '<C-R>+') -- Paste command mode
+  vim.keymap.set('i', '<C-v>', '<ESC>l"+Pli') -- Paste insert mode
+
+  -- change scale
+  vim.g.neovide_scale_factor = 1.0
+  local change_scale_factor = function(delta)
+    vim.g.neovide_scale_factor = vim.g.neovide_scale_factor * delta
+  end
+  vim.keymap.set("n", "<C-=>", function()
+    change_scale_factor(1.25)
+  end)
+  vim.keymap.set("n", "<C-->", function()
+    change_scale_factor(1/1.25)
+  end)
+  
+  vim.g.neovide_padding_top = 20
+  vim.g.neovide_padding_bottom = 10
+  vim.g.neovide_padding_right = 20
+  vim.g.neovide_padding_left = 20
+
+  vim.g.neovide_cursor_animation_length = 0.13
+  vim.g.neovide_cursor_trail_size = 0.4
+  vim.g.neovide_cursor_smooth_blink = true
+  vim.g.neovide_refresh_rate = 144
+
+end
+
+-- Enable line numbers
+vim.wo.number = true          -- Show absolute line number for the current line
+vim.wo.relativenumber = true -- Show relative line numbers for other line
+
+-- No line numbers in terminal
+vim.api.nvim_create_augroup("Terminal", { clear = true })
+vim.api.nvim_create_autocmd("TermOpen", {
+	group = "Terminal",
+	pattern = "*",
+	command = "setlocal nonumber norelativenumber",
+})
+
+-- Set the shell to PowerShell
+vim.o.shell  = "powershell.exe -NoExit -Command \"cd ~\""
+-- vim.o.shell = 'echo test'
+vim.o.shellxquote = ''
+
+-- Set shell command flag
+vim.o.shellcmdflag = '-NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command '
+
+-- Set shell quote
+vim.o.shellquote = ''
+
+-- Set shell pipe and redirection
+vim.o.shellpipe = '| Out-File -Encoding UTF8 %s'
+vim.o.shellredir = '| Out-File -Encoding UTF8 %s'
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.opt.mouse = 'a'
@@ -60,6 +115,12 @@ vim.opt.inccommand = 'split'
 vim.opt.cursorline = true
 
 -- Minimal number of screen lines to keep above and below the cursor.
-vim.opt.scrolloff = 10
+vim.opt.scrolloff = 14
 
 -- vim: ts=2 sts=2 sw=2 et
+
+-- Allow clipboard copy paste in neovim
+vim.api.nvim_set_keymap('', '<C-v>', '+p<CR>', { noremap = true, silent = true})
+vim.api.nvim_set_keymap('!', '<C-v>', '<C-R>+', { noremap = true, silent = true})
+vim.api.nvim_set_keymap('t', '<C-v>', '<C-R>+', { noremap = true, silent = true})
+vim.api.nvim_set_keymap('v', '<C-v>', '<C-R>+', { noremap = true, silent = true})
