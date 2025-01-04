@@ -3,8 +3,13 @@
 -- NOTE: You can change these options as you wish!
 --  For more options, you can see `:help option-list`
 
--- neovide settings
+-- Remap 'jk' to exit insert mode
+vim.keymap.set('i', 'jk', '<C-[>', { noremap = true, silent = true })
 
+-- Map 'jk' to exit terminal mode in terminal buffers
+vim.keymap.set('t', 'jk', '<C-\\><C-n>', { noremap = true, silent = true })
+
+-- neovide settings
 if vim.g.neovide then
   vim.keymap.set('n', '<C-s>', ':w<CR>') -- Save
   vim.keymap.set('v', '<C-c>', '"+y') -- Copy
@@ -18,13 +23,13 @@ if vim.g.neovide then
   local change_scale_factor = function(delta)
     vim.g.neovide_scale_factor = vim.g.neovide_scale_factor * delta
   end
-  vim.keymap.set("n", "<C-=>", function()
+  vim.keymap.set('n', '<C-=>', function()
     change_scale_factor(1.25)
   end)
-  vim.keymap.set("n", "<C-->", function()
-    change_scale_factor(1/1.25)
+  vim.keymap.set('n', '<C-->', function()
+    change_scale_factor(1 / 1.25)
   end)
-  
+
   vim.g.neovide_padding_top = 20
   vim.g.neovide_padding_bottom = 10
   vim.g.neovide_padding_right = 20
@@ -34,23 +39,22 @@ if vim.g.neovide then
   vim.g.neovide_cursor_trail_size = 0.4
   vim.g.neovide_cursor_smooth_blink = true
   vim.g.neovide_refresh_rate = 144
-
 end
 
 -- Enable line numbers
-vim.wo.number = true          -- Show absolute line number for the current line
+vim.wo.number = true -- Show absolute line number for the current line
 vim.wo.relativenumber = true -- Show relative line numbers for other line
 
 -- No line numbers in terminal
-vim.api.nvim_create_augroup("Terminal", { clear = true })
-vim.api.nvim_create_autocmd("TermOpen", {
-	group = "Terminal",
-	pattern = "*",
-	command = "setlocal nonumber norelativenumber",
+vim.api.nvim_create_augroup('Terminal', { clear = true })
+vim.api.nvim_create_autocmd('TermOpen', {
+  group = 'Terminal',
+  pattern = '*',
+  command = 'setlocal nonumber norelativenumber',
 })
 
 -- Set the shell to PowerShell
-vim.o.shell  = "powershell.exe -NoExit -Command \"cd ~\""
+vim.o.shell = 'powershell.exe -NoExit -Command "cd ~"'
 -- vim.o.shell = 'echo test'
 vim.o.shellxquote = ''
 
@@ -120,7 +124,31 @@ vim.opt.scrolloff = 14
 -- vim: ts=2 sts=2 sw=2 et
 
 -- Allow clipboard copy paste in neovim
-vim.api.nvim_set_keymap('', '<C-v>', '+p<CR>', { noremap = true, silent = true})
-vim.api.nvim_set_keymap('!', '<C-v>', '<C-R>+', { noremap = true, silent = true})
-vim.api.nvim_set_keymap('t', '<C-v>', '<C-R>+', { noremap = true, silent = true})
-vim.api.nvim_set_keymap('v', '<C-v>', '<C-R>+', { noremap = true, silent = true})
+vim.api.nvim_set_keymap('', '<C-v>', '+p<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('!', '<C-v>', '<C-R>+', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('t', '<C-v>', '<C-R>+', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('v', '<C-v>', '<C-R>+', { noremap = true, silent = true })
+
+vim.api.nvim_create_autocmd({ 'TermRequest' }, {
+  desc = 'Handles OSC 7 dir change requests',
+  callback = function(ev)
+    if string.sub(vim.v.termrequest, 1, 4) == '\x1b]7;' then
+      local dir = string.gsub(vim.v.termrequest, '\x1b]7;file://[^/]*', '')
+      if vim.fn.isdirectory(dir) == 0 then
+        vim.notify('invalid dir: ' .. dir)
+        return
+      end
+      vim.api.nvim_buf_set_var(ev.buf, 'osc7_dir', dir)
+      if vim.o.autochdir and vim.api.nvim_get_current_buf() == ev.buf then
+        vim.cmd.cd(dir)
+      end
+    end
+  end,
+})
+vim.api.nvim_create_autocmd({ 'BufEnter', 'WinEnter', 'DirChanged' }, {
+  callback = function(ev)
+    if vim.b.osc7_dir and vim.fn.isdirectory(vim.b.osc7_dir) == 1 then
+      vim.cmd.cd(vim.b.osc7_dir)
+    end
+  end,
+})

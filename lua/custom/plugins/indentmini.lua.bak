@@ -1,0 +1,16 @@
+return {
+  'nvimdev/indentmini.nvim',
+  opts = {
+    char = '│', -- Custom character for indent lines
+    exclude = { 'markdown', 'help' }, -- Add filetypes to exclude
+    minlevel = 2, -- Indent lines appear starting from the 2nd level
+    only_current = true, -- Highlight only the current range
+  },
+  config = function()
+    require('indentmini').setup()
+  end,
+}
+
+-- Optional highlight configuration
+-- vim.cmd.highlight('IndentLine guifg=#123456')            -- Set color for indent lines
+-- vim.cmd.highlight('IndentLineCurrent guifg=#654321')     -- Set color for the current indent line

@@ -84,7 +84,7 @@ return {
       vim.keymap.set('n', '<leader>sd', builtin.diagnostics, { desc = '[S]earch [D]iagnostics' })
       vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
       vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
-      vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
+      -- vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
 
       -- Slightly advanced example of overriding default behavior and theme
       vim.keymap.set('n', '<leader>/', function()
@@ -105,9 +105,41 @@ return {
       end, { desc = '[S]earch [/] in Open Files' })
 
       -- Shortcut for searching your Neovim configuration files
-      vim.keymap.set('n', '<leader>sn', function()
+      vim.keymap.set('n', '<leader>snf', function()
         builtin.find_files { cwd = vim.fn.stdpath 'config' }
       end, { desc = '[S]earch [N]eovim files' })
+
+      -- Shortcut for searching your Neovim configuration files for words
+      vim.keymap.set('n', '<leader>sn/', function()
+        require('telescope.builtin').live_grep {
+          cwd = vim.fn.stdpath 'config',
+          prompt_title = 'Search Neovim Config Files',
+        }
+      end, { desc = '[S]earch [N]eovim files for words' })
+
+      vim.keymap.set('n', '<leader><leader>', function()
+        require('telescope.builtin').buffers {
+          attach_mappings = function(_, map)
+            -- Map 'q' to close the selected buffer in insert mode
+            map('i', '<C-q>', function(prompt_bufnr)
+              local selection = require('telescope.actions.state').get_selected_entry()
+              if selection then
+                vim.api.nvim_buf_delete(selection.value, { force = true })
+              end
+              require('telescope.actions').close(prompt_bufnr)
+            end)
+            -- Map 'q' to close the selected buffer in normal mode
+            map('n', '<C-q>', function(prompt_bufnr)
+              local selection = require('telescope.actions.state').get_selected_entry()
+              if selection then
+                vim.api.nvim_buf_delete(selection.value, { force = true })
+              end
+              require('telescope.actions').close(prompt_bufnr)
+            end)
+            return true
+          end,
+        }
+      end, { desc = '[ ] Find existing buffers' })
     end,
   },
 }
